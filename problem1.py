@@ -1,11 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def rhs_func1(x):
+def rhs_func(x):
     return 2
 
-def rhs_func2(x):
-    return 0
 
 def analytical_sol(x):
     return x*(1-x)
@@ -53,7 +51,7 @@ def first_fem_solver(a, b, h, func):
 
 def main():
 
-    x_i, x = first_fem_solver(a=0, b=1, h=1/2, func=rhs_func1)
+    x_i, x = first_fem_solver(a=0, b=1, h=1/2, func=rhs_func)
 
     x_fine = np.linspace(0, 1, 100)
 
