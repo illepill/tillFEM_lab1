@@ -1,4 +1,4 @@
-### COMPLETE
+###
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,8 +7,8 @@ def rhs_func(x):
     return 2
 
 
-def analytical_sol(x):
-    return x*(1-x)
+def analytical_sol_derivative(x):
+    return 1 - 2*x
 
 
 def stiffness_matrix_assembler(x):
@@ -37,9 +37,7 @@ def load_vector_assembler(x, func):
     return B
 
 
-def first_fem_solver(a, b, h, func):
-
-    N = int((b-a)/h + 1)
+def first_fem_solver(a, b, N, func):
 
     x = np.linspace(a, b, N)
     
@@ -48,20 +46,29 @@ def first_fem_solver(a, b, h, func):
 
     x_i = np.linalg.solve(A, B)
 
-    return x_i, x
+    return x_i, A, x
 
 
 def main():
 
-    x_i, x = first_fem_solver(a=0, b=1, h=1/2, func=rhs_func)
+    u_analytical_norm = 1/3
 
-    x_fine = np.linspace(0, 1, 100)
+    N = np.arange(2, 1000)
+
+    err_vec = np.zeros_like(N, dtype=float)
+
+    for idx, e in enumerate(N):
+
+        x_i, A, _ = first_fem_solver(0, 1, e, rhs_func)
+
+        u_numerical_norm = x_i.T@A@x_i
+
+        err_vec[idx] = u_analytical_norm - u_numerical_norm
 
     plt.figure()
-    plt.plot(x_fine, analytical_sol(x_fine), label = "Analytical")
-    plt.plot(x, x_i, label = "Numerical")
-    plt.legend()
-    plt.show()
+    plt.loglog(N, err_vec)
+    plt.grid(alpha=0.2)
+
 
 if __name__ == "__main__":
     main()
