@@ -1,14 +1,8 @@
-### COMPLETE
-
 import numpy as np
 import matplotlib.pyplot as plt
 
 def rhs_func(x):
-    return 2
-
-
-def analytical_sol(x):
-    return x*(1-x)
+    return np.exp(-1000*(x-0.5)**2)
 
 
 def stiffness_matrix_assembler(x):
@@ -20,9 +14,25 @@ def stiffness_matrix_assembler(x):
         h = x[i+1] - x[i]
         A[i:i+2, i:i+2] += np.array([[1, -1], [-1, 1]])/h
     
-    A[0,0], A[-1, -1] = 1e6, 1e6
+    A[0,0], A[-1, -1] = 1, 1
+    A[0,1], A[-1, -2] = 0, 0
 
     return A
+
+
+def mass_matrix_assembler(x):
+    N = len(x) - 1
+    
+    M = np.zeros((N+1, N+1))
+
+    for i in range(N):
+        h = x[i+1] - x[i]
+        M[i:i+2, i:i+2] += np.array([[2, 1], [1, 2]])*h/6
+
+    M[0, 0] *= 2
+    M[-1, -1] *= 2
+
+    return M
 
 
 def load_vector_assembler(x, func):
@@ -53,14 +63,15 @@ def first_fem_solver(a, b, h, func):
 
 def main():
 
-    x_i, x, A = first_fem_solver(a=0, b=1, h=1/256, func=rhs_func)
+    x_i, x, A = first_fem_solver(a=0, b=1, h=1/2, func=rhs_func)
 
-    print(np.linalg.cond(A))
+    M = mass_matrix_assembler(x)
 
-    x_fine = np.linspace(0, 1, 100)
+    psi = np.linalg.solve(-M, A@x_i)
+
+    res = rhs_func(x) + psi
 
     plt.figure()
-    plt.plot(x_fine, analytical_sol(x_fine), label = "Analytical")
     plt.plot(x, x_i, label = "Numerical")
     plt.legend()
     plt.show()
