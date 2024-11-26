@@ -5,6 +5,10 @@ def rhs_func(x):
     return 2
 
 
+def analytical_sol(x):
+    return x*(1-x)
+
+
 def stiffness_matrix_assembler(x):
     N = len(x) - 1
     
@@ -54,8 +58,11 @@ def main():
 
     print(np.linalg.cond(A))
 
+    x_fine = np.linspace(0, 1, 100)
+
     plt.figure()
     plt.plot(x, x_i, label = "Numerical")
+    plt.plot(x_fine, analytical_sol(x_fine), label = "Analytical")
     plt.legend()
     plt.show()
 
